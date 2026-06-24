@@ -1,0 +1,16 @@
+# Déploiement Render (Infrastructure as Code).
+# Render détecte ce fichier et crée le service automatiquement.
+services:
+  - type: web
+    name: pilotis-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: AUTH_SECRET
+        generateValue: true        # secret aléatoire généré par Render
+      - key: PILOTIS_EMAIL
+        value: contact@mohna-consulting.com
+      - key: PILOTIS_PASSWORD
+        sync: false                # à saisir dans le dashboard Render (non versionné)

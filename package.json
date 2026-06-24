@@ -1,0 +1,17 @@
+{
+  "name": "pilotis-api",
+  "private": true,
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Pilotis — API REST (Express, PostgreSQL ou stockage JSON)",
+  "scripts": {
+    "seed": "node seed.js",
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
