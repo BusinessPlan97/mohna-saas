@@ -35,6 +35,28 @@ app.use("/api", (req, res, next) => {
   next();
 });
 
+// --- Assistant IA : proxy Claude (Anthropic). La clé reste côté serveur. ---
+app.post("/api/ai", wrap(async (req, res) => {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return res.status(400).json({ error: { code: "ai_not_configured", message: "IA non configurée : ajoutez la variable ANTHROPIC_API_KEY sur le serveur." } });
+  const { prompt, system } = req.body || {};
+  if (!prompt) return unprocessable(res, ["Le champ « prompt » est requis."]);
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-latest",
+      max_tokens: 1200,
+      system: system || "Tu es l'assistant métier d'un consultant indépendant français (devis, factures, missions, relances, compta). Réponds en français, de façon concrète, professionnelle et concise.",
+      messages: [{ role: "user", content: String(prompt) }],
+    }),
+  });
+  const data = await r.json().catch(() => null);
+  if (!r.ok) return res.status(502).json({ error: { code: "ai_error", message: data?.error?.message || ("Erreur IA " + r.status) } });
+  const text = (data?.content || []).map((b) => b.text || "").join("").trim();
+  res.json({ text });
+}));
+
 // Liste
 app.get("/api/:resource", wrap(async (req, res) => {
   const { resource } = req.params;
